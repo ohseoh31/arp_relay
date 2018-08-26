@@ -157,7 +157,7 @@ void* relayPacket(void * arp_sender){
 	
 	struct ether_h *et_h;
 	struct ip_hdr * ip_h;
-    struct arp_hdr *arp_h;
+    	struct arp_hdr *arp_h;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	char *dev;
 	struct arp_packet * arp_info;
@@ -235,9 +235,6 @@ int main(int argc, char *argv[])
 	
 	struct relay_info *relay_in = (struct relay_info *)malloc(thread_num);
 	struct relay_info *tmp_relay_in;
-
-	struct dst_info * static_dst_infos = (struct dst_info* )malloc(thread_num);
-	struct dst_info * tmp_dst_in;
 	int i;
 	
 	pcap_t* handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
@@ -246,13 +243,11 @@ int main(int argc, char *argv[])
 	tmp_dst_in = static_dst_infos;
 
 	for (i = 0 ; i < thread_num ; i++){
-		//printf("hello\n");
+
 		ip_in.ip_src = argv[2*i+2];
 		ip_in.ip_dst = argv[2*i+3];
 		ip_in.mac_info = argv[1];
-		//tmp_relay_in +=i;
 		tmp_arp_packet +=i;
-		tmp_dst_in +=i;
 		setARP_RequestPacket(tmp_arp_packet, &ip_in);
 	
 	}
@@ -269,8 +264,7 @@ int main(int argc, char *argv[])
 	tmp_arp_packet = arp_spo_packet;
 	tmp_sender = t_sender;
 	tmp_relay = t_relay;
-
-
+	
 	for (i = 0 ; i < thread_num ; i++){
 		tmp_arp_packet +=i;
 		tmp_sender +=i;
@@ -291,6 +285,8 @@ int main(int argc, char *argv[])
 	}
 	
 	//memory free
+	free(relay_in);
+	free(arp_spo_packet);
 	free(t_sender);
 	free(t_relay);
 }
