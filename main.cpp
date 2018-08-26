@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
 	pcap_t* handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
 	
 	tmp_arp_packet = arp_spo_packet;
-	tmp_dst_in = static_dst_infos;
 
 	for (i = 0 ; i < thread_num ; i++){
 
