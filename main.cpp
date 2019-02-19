@@ -162,48 +162,37 @@ void* relayPacket(void * arp_sender){
 	char *dev;
 	struct arp_packet * arp_info;
 	arp_info = (struct arp_packet*) arp_sender;
-	
-	
-	
 
 	dev = arp_info->ip_in.mac_info;
 	pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
-  	
-
 	while (true) {
 		struct pcap_pkthdr* header;
 		struct ether_h * et_h;
-    	const u_char* packet;
-    	const u_char* tmp;
-    	int res = pcap_next_ex(handle, &header, &packet);
-    		
-    		if (res == 0) continue;
-    		if (res == -1 || res == -2) break;
+		const u_char* packet;
+		const u_char* tmp;
+		int res = pcap_next_ex(handle, &header, &packet);
 
-    	tmp = packet;
-    	et_h = (struct ether_h *)tmp;
+		if (res == 0) continue;
+		if (res == -1 || res == -2) break;
+		tmp = packet;
+		et_h = (struct ether_h *)tmp;
 
-    	if(ntohs(et_h->ether_type) == ETHERTYPE_IP){
-    		tmp += sizeof(struct ether_h);
-        	ip_h = (struct ip_hdr *)tmp;
-        	if (ip_h->ip_p == IPPROTO_TCP){
-        		
-				if (memcmp((void *)(packet+6), (void *)arp_info->et_h.ether_dst_mac,6) ==0
-					&& memcmp((void *)packet, (void *)arp_info->et_h.ether_src_mac,6) ==0
-					&& memcmp((void *)&ip_h->ip_dst, (void *)&arp_info->dst_in.ip_dst,4)==0 ){
+		if(ntohs(et_h->ether_type) == ETHERTYPE_IP){
+			tmp += sizeof(struct ether_h);
+			ip_h = (struct ip_hdr *)tmp;
+			if (ip_h->ip_p == IPPROTO_TCP){
+					if (memcmp((void *)(packet+6), (void *)arp_info->et_h.ether_dst_mac,6) ==0
+						&& memcmp((void *)packet, (void *)arp_info->et_h.ether_src_mac,6) ==0
+						&& memcmp((void *)&ip_h->ip_dst, (void *)&arp_info->dst_in.ip_dst,4)==0 ){
 
-						memcpy((void *)packet , (void *)arp_info->dst_in.dst_mac , 6);
-						pcap_sendpacket(handle, packet, header->caplen /* size */);
-						printf("TCP");
-						printf("\nsize : %d\n",header->caplen);
-	
+							memcpy((void *)packet , (void *)arp_info->dst_in.dst_mac , 6);
+							pcap_sendpacket(handle, packet, header->caplen /* size */);
+							printf("TCP");
+							printf("\nsize : %d\n",header->caplen);
 				}
 			}
 		}		
 	}
-		//TODO Unicast 
-		//TODO Broad_Cast
-
 }
 
 
